@@ -1303,8 +1303,8 @@ function init() {
     e.preventDefault();
     const v = $('#waInput').value.trim(); if (!v || S.busy || !cur()) return;
     $('#waInput').value = ''; processInbound(cur(), v, { live: true });
-  $('#waFab').onclick = () => { if (!S.busy) openWA(); };
   };
+  $('#waFab').onclick = async () => { if (S.busy) return; await openWA(); $('#waInput').focus(); };
   document.addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT') return;
     if (e.key === ' ' || e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); next(); }
