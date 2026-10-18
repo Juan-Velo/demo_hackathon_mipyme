@@ -1,0 +1,65 @@
+/* Tokens, lienzo, barra superior, columnas y narración */
+:root{
+  /* Paleta iOS + tinte de la marca */
+  --bg:#F2F2F7;--card:#FFFFFF;--fill:#F2F2F7;--fill2:#E9E9EF;
+  --label:#1C1C1E;--label2:#636369;--label3:#76767C;--sep:#E5E5EA;
+  --tint:#C80063;--tint-soft:#FFEAF4;
+  --green:#34C759;--green-ink:#187A33;--orange:#FF9500;--blue:#0062CC;--red:#FF3B30;
+  --marca:linear-gradient(120deg,#FD1405 0%,#FF3D8B 30%,#FF59EF 52%,#FEABB5 74%,#FEF305 100%);
+  --wa:#00A884;--wa-out:#D9FDD3;--wa-bg:#EFEAE2;--wa-link:#027EB5;
+  --sf:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Inter","Segoe UI",system-ui,sans-serif;
+  --r-xl:30px;--r-l:22px;--r-m:16px;--r-s:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#E3E3E9;overflow:hidden}
+body{font-family:var(--sf);color:var(--label);-webkit-font-smoothing:antialiased;font-size:14px;letter-spacing:-.005em}
+button{font-family:inherit;color:inherit}
+button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.viewport{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.stage{width:1600px;height:900px;flex:none;position:relative;transform-origin:center center;background:var(--bg);
+  display:grid;grid-template-rows:76px 1fr 92px;padding:0 22px;overflow:hidden}
+
+/* ---------- barra superior ---------- */
+.top{display:flex;align-items:center;gap:18px;white-space:nowrap}
+.top .logo{height:38px}
+.top h1{font-size:20px;font-weight:700;letter-spacing:-.02em}
+.seg{display:inline-flex;background:var(--fill2);border-radius:12px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;border-radius:9px;padding:8px 15px;font-size:14.5px;font-weight:600;color:var(--label2);cursor:pointer;position:relative;transition:background .2s,color .2s}
+.seg button[aria-pressed="true"],.seg button[aria-selected="true"]{background:#fff;color:var(--label);box-shadow:0 1px 3px rgba(0,0,0,.12),0 0 0 .5px rgba(0,0,0,.04)}
+.seg .badge{position:absolute;top:3px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--tint);display:none}
+.seg .badge.on{display:block}
+.scns{margin-left:8px}
+.clock{margin-left:auto;display:flex;align-items:baseline;gap:8px;background:var(--card);border-radius:999px;padding:9px 18px}
+.clock .d{font-size:14px;color:var(--label2);text-transform:capitalize}
+.clock .t{font-size:21px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.clock.ff{animation:ffpulse .5s ease-in-out infinite alternate}
+@keyframes ffpulse{to{box-shadow:0 0 0 4px rgba(255,149,0,.35)}}
+.ctrls{display:flex;gap:8px}
+.cbtn{display:inline-flex;align-items:center;gap:7px;border:0;border-radius:999px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;background:var(--card);color:var(--label)}
+.cbtn.icon{padding:10px;width:40px;justify-content:center}
+.cbtn svg{width:16px;height:16px}
+.cbtn.primary{background:var(--tint);color:#fff;padding:10px 20px}
+.cbtn:disabled{opacity:.35;cursor:default}
+
+/* ---------- cuerpo ---------- */
+.main{display:grid;grid-template-columns:360px 700px 1fr;gap:22px;min-height:0;padding-bottom:6px}
+.main > *{min-height:0}
+.panel{background:var(--card);border-radius:var(--r-xl);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.panel-h{padding:20px 22px 12px;display:flex;align-items:center;gap:12px}
+.panel-h h2{font-size:24px;font-weight:700;letter-spacing:-.025em}
+.panel-h .sub{font-size:13px;color:var(--label2);margin-top:2px}
+.pane{flex:1;overflow-y:auto;min-height:0;display:none;padding:0 18px 18px}
+.pane.on{display:block}
+.pane::-webkit-scrollbar{width:0}
+
+/* ---------- narración ---------- */
+.cap{align-self:center;display:flex;align-items:center;gap:16px;background:var(--card);border-radius:26px;padding:14px 22px 14px 14px;position:relative;overflow:hidden;
+  box-shadow:0 8px 24px -12px rgba(0,0,0,.18)}
+.cap .app{width:44px;height:44px;border-radius:12px;background:#000;display:grid;place-items:center;flex:none}
+.cap .app img{width:28px;height:28px}
+.cap .stepn{font-size:13.5px;color:var(--label2);font-weight:600;white-space:nowrap}
+.cap .txt{font-size:19px;font-weight:500;line-height:1.35;flex:1;letter-spacing:-.01em}
+.cap .txt b{font-weight:700;color:var(--tint)}
+.progress{position:absolute;left:0;bottom:0;height:3px;background:var(--marca);transition:width .3s}
+
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}

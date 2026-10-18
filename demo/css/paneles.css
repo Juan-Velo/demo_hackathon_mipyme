@@ -1,0 +1,72 @@
+/* Panel derecho: ficha, seguimientos, celular de Alberto y resultados */
+/* ---------- ficha (Pipedrive) ---------- */
+.who{display:flex;gap:14px;align-items:center;padding:4px 4px 14px}
+.av{width:54px;height:54px;border-radius:50%;background:linear-gradient(160deg,#8E8E93,#5A5A5F);color:#fff;display:grid;place-items:center;font-weight:600;font-size:20px;flex:none}
+.who h3{font-size:20px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.who .org{font-size:13px;color:var(--label2);margin-top:2px}
+.who .tags{display:flex;gap:6px;margin-top:6px}
+.pill{font-size:12px;font-weight:600;border-radius:999px;padding:3px 10px}
+.pill.hot{background:#FFE5E3;color:#C4261D}.pill.warm{background:#FFF1D6;color:#A15C00}.pill.cold{background:#E3EEFB;color:#1F5FA8}
+.pill.won{background:#E0F5E5;color:var(--green-ink)}.pill.lost{background:var(--fill2);color:var(--label2)}.pill.human{background:#EFE6FF;color:#5B2FB0}
+.score{margin-left:auto;width:72px;height:72px;border-radius:50%;display:grid;place-items:center;text-align:center;flex:none;
+  background:conic-gradient(var(--sc,var(--label3)) calc(var(--p,0)*1%),var(--fill2) 0)}
+.score div{width:60px;height:60px;border-radius:50%;background:#fff;display:grid;place-content:center}
+.score b{font-size:22px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.score small{font-size:10px;color:var(--label2);font-weight:500}
+.stages{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:2px 0 6px}
+.stg i{display:block;height:6px;border-radius:999px;background:var(--fill2);transition:background .35s}
+.stg span{display:block;font-size:11.5px;color:var(--label3);margin-top:6px;font-weight:500;white-space:nowrap}
+.stg.on i{background:var(--green)}.stg.on span{color:var(--label)}
+.stg.lost i{background:var(--label3)}
+.group{background:var(--fill);border-radius:var(--r-m);margin-top:14px;overflow:hidden}
+.row{display:flex;justify-content:space-between;gap:12px;padding:11px 14px;font-size:14px;position:relative;transition:background .5s}
+.row + .row::before{content:"";position:absolute;top:0;left:14px;right:0;height:.5px;background:var(--sep)}
+.row .k{color:var(--label2)}
+.row .v{font-weight:500;text-align:right}
+.row.flash{background:#FFF6DB}
+.note{margin-top:14px;background:var(--tint-soft);border-radius:var(--r-m);border-bottom-left-radius:6px;padding:12px 14px;font-size:13.5px;line-height:1.45;color:#3D1C2C}
+.note b{display:block;font-size:12.5px;color:var(--tint);margin-bottom:3px}
+.acts{display:flex;gap:8px;margin-top:14px}
+.pbtn{flex:1;border:0;background:var(--fill);border-radius:14px;padding:12px 10px;font-size:14px;font-weight:600;color:var(--blue);cursor:pointer}
+.pbtn.g{background:var(--green);color:#fff}
+.pbtn:disabled{opacity:.35;cursor:default}
+.pbtn.pulse{animation:ring 1s ease-in-out infinite}
+@keyframes ring{50%{box-shadow:0 0 0 5px rgba(52,199,89,.3)}}
+.empty{padding:40px 14px;color:var(--label2);font-size:14px;text-align:center;line-height:1.45}
+
+/* ---------- seguimientos ---------- */
+.q-intro{font-size:13.5px;color:var(--label2);line-height:1.45;padding:2px 4px 12px}
+.job{display:grid;grid-template-columns:74px 1fr auto;gap:12px;align-items:center;background:var(--fill);border-radius:var(--r-m);padding:12px 14px;margin-bottom:8px;animation:pop .25s ease-out}
+.job .when{font-size:12.5px;line-height:1.3;color:var(--label2)}
+.job .when b{display:block;font-size:15px;color:var(--label);font-weight:600;font-variant-numeric:tabular-nums}
+.job .what b{font-size:14.5px;font-weight:600;display:block}
+.job .what span{font-size:12.5px;color:var(--label2)}
+.job .what em{font-style:normal;color:var(--orange)}
+.st-pill{font-size:12px;font-weight:600;border-radius:999px;padding:4px 10px;white-space:nowrap;background:#fff;color:var(--label2)}
+.st-pill.sent{background:#E0F5E5;color:var(--green-ink)}
+.st-pill.canc{background:#fff;color:var(--label3)}
+.st-pill.next{background:var(--label);color:#fff}
+.job.cancel{opacity:.55}.job.cancel .what b{text-decoration:line-through}
+
+/* ---------- celular de Alberto ---------- */
+.mini{border-radius:var(--r-l);overflow:hidden;display:flex;flex-direction:column;height:100%;min-height:420px;background:var(--wa-bg)}
+.mini .wa-h{padding:12px 14px}
+.mini-chat{flex:1;padding:12px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
+.alert{align-self:flex-start;max-width:92%;background:#fff;border-radius:18px;border-bottom-left-radius:6px;padding:10px 13px 8px;font-size:13.5px;line-height:1.42;animation:pop .25s ease-out}
+.alert .hd{font-weight:700;margin-bottom:3px}
+.alert .meta{display:block;text-align:right;font-size:10.5px;color:#7A8A92;margin-top:2px}
+.alert-btns{display:flex;gap:6px;margin-top:8px}
+.alert-btns button{flex:1;border:0;border-radius:12px;background:var(--fill);color:var(--wa-link);font-size:13px;font-weight:600;padding:8px 4px;cursor:pointer}
+.alert-btns button:disabled{color:#A8BEC8;cursor:default}
+
+/* ---------- resultados ---------- */
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{background:var(--fill);border-radius:var(--r-l);padding:16px 16px 14px}
+.kpi .n{font-size:34px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.kpi .t{font-size:13px;color:var(--label2);margin-top:6px;line-height:1.35}
+.kpi.big{grid-column:1 / -1;background:var(--label);color:#fff}
+.kpi.big .t{color:#C7C7CC}
+
+/* pestañas del panel a todo el ancho */
+#rTabs{display:flex;width:100%}
+#rTabs button{flex:1;padding:8px 6px}
