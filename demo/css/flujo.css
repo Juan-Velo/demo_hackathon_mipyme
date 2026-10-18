@@ -4,10 +4,13 @@
 /* ---------- encabezado del editor ---------- */
 .ed-h{display:flex;align-items:center;gap:14px;padding:16px 20px 14px}
 .n8n{flex:none;height:30px;padding:0 10px;border-radius:9px;background:#C8325A;color:#fff;font-size:14px;font-weight:800;letter-spacing:-.02em;display:grid;place-items:center}
-.ed-t{min-width:0}
-.ed-t h2{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.ed-t{min-width:0;flex:1}
+.ed-t h2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ed-t h2{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
 .ed-t .sub{font-size:13.5px;color:var(--label2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.status{margin-left:auto;font-size:13.5px;font-weight:600;border-radius:999px;padding:6px 13px;background:var(--fill);color:var(--label2);white-space:nowrap}
+.canvas-wrap{position:relative}
+.canvas-wrap .status{position:absolute;right:14px;top:10px;box-shadow:0 2px 8px -2px rgba(30,34,48,.18)}
+.status{font-size:13.5px;font-weight:600;border-radius:999px;padding:6px 13px;background:#fff;color:var(--label2);white-space:nowrap}
 .status.run{background:#FFF4E5;color:#A35E00}
 .status.ok{background:#E6F7EA;color:var(--green-ink)}
 .active{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;color:var(--green-ink);white-space:nowrap}
@@ -15,7 +18,7 @@
 .active i::after{content:"";position:absolute;top:2px;right:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2)}
 
 /* ---------- lienzo ---------- */
-.canvas{position:relative;width:100%;aspect-ratio:696 / 420;background-color:#F6F6F8;
+.canvas{position:relative;width:100%;aspect-ratio:686 / 380;background-color:#F6F6F8;
   background-image:radial-gradient(#CDCDD6 1.1px,transparent 1.3px);background-size:20px 20px;border-top:.5px solid var(--sep)}
 .canvas svg.wires{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .wire{fill:none;stroke:#B4B9C4;stroke-width:2;transition:stroke .3s}
@@ -26,19 +29,18 @@
 .branch{font-size:11.5px;font-weight:600;fill:var(--label2)}
 
 /* ---------- nodos ---------- */
-.node{position:absolute;width:68px;height:68px;margin:-34px 0 0 -34px;background:#fff;border:2px solid #CFD2DA;border-radius:14px;
+.node{position:absolute;width:64px;height:64px;margin:-32px 0 0 -32px;background:#fff;border:2px solid #CFD2DA;border-radius:14px;
   display:grid;place-items:center;box-shadow:0 2px 6px -2px rgba(30,34,48,.12);transition:border-color .25s,box-shadow .25s,opacity .25s}
-.node.trig{border-radius:34px 14px 14px 34px}
-.node.ai{width:150px;margin-left:-75px;display:flex;align-items:center;gap:10px;padding:0 12px;justify-content:flex-start}
-.node.ai .lbl{position:static;transform:none;width:auto;text-align:left}
-.node.ai .lbl small{margin-top:2px}
+.node.trig{border-radius:32px 14px 14px 32px}
+.node.ai{width:98px;margin-left:-49px}
+.node.ai .lbl{width:124px}
 .node.sub{width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%}
-.node > svg{width:32px;height:32px}
+.node > svg{width:30px;height:30px}
 .node.sub > svg{width:22px;height:22px}
-.node .lbl{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);width:132px;text-align:center;line-height:1.2;pointer-events:none}
-.node .lbl b{display:block;font-size:12.5px;font-weight:600;color:var(--label)}
-.node .lbl small{display:block;font-size:11.5px;color:var(--label2);margin-top:1px}
-.node.sub .lbl{width:70px;top:calc(100% + 4px)}
+.node .lbl{position:absolute;top:calc(100% + 5px);left:50%;transform:translateX(-50%);width:96px;background:rgba(246,246,248,.92);border-radius:5px;padding:1px 2px;text-align:center;line-height:1.2;pointer-events:none}
+.node .lbl b{display:block;font-size:11.5px;font-weight:600;color:var(--label)}
+.node .lbl small{display:block;font-size:10.5px;color:var(--label2);margin-top:1px}
+.node.sub .lbl{width:56px;top:calc(100% + 3px)}
 .node.sub .lbl b{font-size:11px;font-weight:500;color:var(--label2)}
 .node .st{position:absolute;right:-9px;bottom:-9px;width:20px;height:20px;border-radius:50%;background:var(--green);display:none;place-items:center;border:2px solid #fff}
 .node .st svg{width:10px;height:10px}
@@ -65,3 +67,7 @@
 .le .tm{font-size:12.5px;color:var(--label3);font-variant-numeric:tabular-nums}
 .le.skip{opacity:.5}
 .log-empty{padding:18px 8px;font-size:14px;color:var(--label2)}
+
+/* pestañas de workflows */
+.wf-tabs{margin-left:4px}
+.wf-tabs button{padding:6px 11px;font-size:13px}

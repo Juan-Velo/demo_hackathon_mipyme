@@ -63,10 +63,9 @@
       <div class="ed-h">
         <span class="n8n" aria-hidden="true">n8n</span>
         <div class="ed-t"><h2 id="wfName">Mensaje nuevo</h2><div class="sub" id="wfSub">–</div></div>
-        <span class="status" id="execMeta">Esperando un mensaje</span>
-        <span class="active" title="Workflow activo"><i></i>Activo</span>
+        <div class="seg wf-tabs" id="wfTabs" role="tablist" aria-label="Workflows"></div>
       </div>
-      <div class="canvas" id="canvas"></div>
+      <div class="canvas-wrap"><div class="canvas" id="canvas"></div><span class="status" id="execMeta">Esperando un mensaje</span></div>
     </div>
     <div class="panel exec">
       <div class="ex-h"><h3>Ejecución</h3><span class="sub">Lo que hizo cada nodo, en orden</span></div>
@@ -77,7 +76,7 @@
   <section class="panel" aria-label="CRM y seguimiento">
     <div class="panel-h">
       <div class="seg" id="rTabs" role="tablist" aria-label="Paneles">
-        <button role="tab" data-rp="crm" aria-selected="true">Ficha<i class="badge" id="bdg-crm"></i></button>
+        <button role="tab" data-rp="crm" aria-selected="true">Pipedrive<i class="badge" id="bdg-crm"></i></button>
         <button role="tab" data-rp="seg" aria-selected="false">Seguimientos<i class="badge" id="bdg-seg"></i></button>
         <button role="tab" data-rp="owner" aria-selected="false">Alberto<i class="badge" id="bdg-owner"></i></button>
         <button role="tab" data-rp="funnel" aria-selected="false">Resultados<i class="badge" id="bdg-funnel"></i></button>

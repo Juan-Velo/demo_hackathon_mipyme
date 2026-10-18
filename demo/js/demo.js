@@ -238,13 +238,23 @@ function labelOf(L) {
 }
 function fieldsOf(L) {
   return [
+    ['Teléfono', esc(L.e164)],
+    ['Origen', esc(L.origen)],
     ['Objetivo', esc(L.objetivo || '–')],
     ['Urgencia', esc(L.urgencia || '–')],
     ['Clase de prueba', L.trial ? fmtDay(L.trial) + ', ' + fmtTshort(L.trial) : '–'],
     ['Avisos', L.consent === true ? 'Aceptó' : L.consent === false ? (L.lost ? 'Pidió baja' : 'No acepta') : '–'],
-    ['Valor', L.value ? 'S/ ' + L.value.toLocaleString('es-PE') : '–']
+    ['Puntaje IA', L.score ? `<span class="pd-sc"><i style="width:${L.score}%"></i></span>${L.score}` : '–']
   ];
 }
+const PD_IC = {
+  deals: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.2c-.5-.8-1.4-1.2-2.5-1.2-1.5 0-2.5.8-2.5 1.9 0 2.6 5 1.4 5 4.1 0 1.1-1.1 2-2.6 2-1.2 0-2.2-.5-2.7-1.4M12 6.5V8m0 8v1.5"/></svg>',
+  people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.3-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 4.8a3.5 3.5 0 0 1 0 6.4M18 14.8c1.9.8 3.1 2.5 3.5 5.2"/></svg>',
+  acts: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="17" rx="2"/><path d="M9 2.5v3M15 2.5v3M8.5 13l2.5 2.5 4.5-5"/></svg>',
+  camp: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10v4h3l7 4V6l-7 4zM17.5 9a4 4 0 0 1 0 6"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>',
+  ok: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2"><path d="M6 12.5l4 4 8-8.5"/></svg>'
+};
 function renderCRM() {
   const L = cur(); const p = $('#rp-crm');
   if (!L) { p.innerHTML = '<div class="empty">Sin prospectos todavía.</div>'; return; }
@@ -253,22 +263,35 @@ function renderCRM() {
   const F = fieldsOf(L);
   const stIdx = L.lost ? -1 : STAGES.indexOf(L.stage);
   const ini = L.name.split(' ').map(w => w[0]).slice(0, 2).join('');
-  const hot = L.score >= CONFIG.umbralCaliente;
+  const val = L.value || (L.pay && L.pay.p) || null;
   const canAsist = L.stage === 'Prueba agendada' && L.trial && S.now >= L.trial;
-  p.innerHTML = `
-    <div class="who">
-      <div class="av">${esc(ini)}</div>
-      <div><h3>${esc(L.name)}</h3><div class="org">${esc(L.origen)}</div>
-        <div class="tags">${L.score ? `<span class="pill ${lc}">${lt}</span>` : ''}${L.human ? '<span class="pill human">Atiende Alberto</span>' : ''}</div></div>
-      <div class="score" style="--p:${L.score || 0};--sc:${hot ? 'var(--tint)' : L.score >= 50 ? 'var(--orange)' : 'var(--blue)'}"><div><b>${L.score || '–'}</b><small>puntaje</small></div></div>
-    </div>
-    <div class="stages">${STAGES.map((s, i) => `<div class="stg ${L.lost ? (i === 0 ? 'lost' : '') : (i <= stIdx ? 'on' : '')}"><i></i><span>${L.lost && i === 0 ? 'Perdido' : s.replace(' agendada', '')}</span></div>`).join('')}</div>
-    <div class="group">${F.map(([k, v]) => `<div class="row ${prev[k] !== undefined && prev[k] !== v ? 'flash' : ''}"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')}</div>
-    <div class="note"><b>Resumen de la IA</b>${esc(L.resumen || 'Se escribe solo con el primer mensaje.')}</div>
-    <div class="acts">
-      <button class="pbtn" id="btnHuman">${L.human ? 'Devolver al asistente' : 'Tomar conversación'}</button>
-      <button class="pbtn g ${canAsist ? 'pulse' : ''}" id="btnAsistio" ${canAsist ? '' : 'disabled'}>Marcar que asistió</button>
-    </div>`;
+  const acts = L.acts.length ? L.acts.map(a => `<li class="pd-act ${a.done ? 'done' : ''}"><i class="ck">${a.done ? PD_IC.ok : ''}</i><span><b>${esc(a.text)}</b><small>${esc(a.when)}</small></span></li>`).join('')
+    : '<li class="pd-act none">Sin actividades todavía.</li>';
+  p.innerHTML = `<div class="pd">
+    <nav class="pd-side" aria-hidden="true"><b class="pd-p">p</b><i class="on">${PD_IC.deals}</i><i>${PD_IC.people}</i><i>${PD_IC.acts}</i><i>${PD_IC.camp}</i></nav>
+    <div class="pd-main">
+      <div class="pd-top"><b>Deals</b><span class="pd-search">${PD_IC.search}Buscar en Pipedrive</span><span class="pd-me" title="${esc(CONFIG.director)}">AP</span></div>
+      <div class="pd-body">
+        <div class="pd-deal">
+          <div class="pd-av">${esc(ini)}</div>
+          <div class="pd-ttl"><h3>${esc(L.name)}</h3><small>${val ? 'S/ ' + val.toLocaleString('es-PE') + ' · ' : ''}Embudo de ventas</small></div>
+          ${L.won ? '<span class="pd-st won">Ganado</span>' : L.lost ? '<span class="pd-st lost">Perdido</span>' : L.score ? `<span class="pill ${lc}">${lt}</span>` : ''}
+        </div>
+        ${L.human ? '<div class="pd-flag">Atiende Alberto: el asistente está en pausa</div>' : ''}
+        <div class="pd-stages">${STAGES.map((s, i) => `<span class="${L.lost ? (i === 0 ? 'lost' : '') : (i <= stIdx ? 'on' : '')}">${L.lost && i === 0 ? 'Perdido' : s.replace(' agendada', '')}</span>`).join('')}</div>
+        <h4>Detalles</h4>
+        <dl class="pd-f">${F.map(([k, v]) => `<div class="${prev[k] !== undefined && prev[k] !== v ? 'flash' : ''}"><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
+        <h4>Nota del asistente</h4>
+        <div class="pd-note">${esc(L.resumen || 'Se escribe sola con el primer mensaje.')}</div>
+        <h4>Actividades</h4>
+        <ul class="pd-acts">${acts}</ul>
+        <div class="pd-btns"${L.won ? ' hidden' : ''}>
+          <button class="pbtn" id="btnHuman">${L.human ? 'Devolver al asistente' : 'Tomar conversación'}</button>
+          <button class="pbtn g ${canAsist ? 'pulse' : ''}" id="btnAsistio" ${canAsist ? '' : 'disabled'}>Marcar que asistió</button>
+        </div>
+      </div>
+      ${L.won ? `<div class="pd-toast"><b class="pd-p big">p</b><span>Deal ganado<small>S/ ${(val || 0).toLocaleString('es-PE')} · ${esc(first(L))}</small></span></div>` : ''}
+    </div></div>`;
   L._prev = Object.fromEntries(F);
   $('#btnHuman').onclick = () => toggleHuman(L);
   $('#btnAsistio').onclick = () => { if (!S.busy) runAsistio(L); };
@@ -585,59 +608,63 @@ function summaryOf(L) {
    Coordenadas: centro del nodo, en px del lienzo (696 × 420).
    ===================================================================== */
 IC.score = '<svg viewBox="0 0 24 24" fill="none" stroke="#FF6D5A" stroke-width="2.2" stroke-linecap="round"><path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-6"/></svg>';
-const RET = (x1, y1, x2, y2, xr, ym) => `M${x1},${y1} C${xr},${y1} ${xr},${y1} ${xr},${y1 + 30} L${xr},${ym - 16} Q${xr},${ym} ${xr - 16},${ym} L36,${ym} Q20,${ym} 20,${ym + 16} L20,${y2 - 14} Q20,${y2} 34,${y2} L${x2},${y2}`;
 const WF = {
   main: {
-    name: 'Mensaje nuevo', sub: 'Se ejecuta con cada mensaje que llega por WhatsApp',
+    name: 'WA · Entrada de mensajes', tab: 'Entrada', sub: 'Se ejecuta con cada mensaje que llega por WhatsApp',
     nodes: [
-      { id: 'trig', x: 70, y: 82, ic: 'wa', l: 'WhatsApp Trigger', s: 'Llega el mensaje', k: 'trig' },
-      { id: 'agent', x: 252, y: 82, ic: 'ai', l: 'AI Agent', s: 'Entiende y redacta', k: 'ai' },
-      { id: 'model', x: 202, y: 200, ic: 'model', l: 'Modelo', k: 'sub' },
-      { id: 'mem', x: 252, y: 200, ic: 'mem', l: 'Memoria', k: 'sub' },
-      { id: 'tool', x: 302, y: 200, ic: 'tool', l: 'Agenda', k: 'sub' },
-      { id: 'score', x: 436, y: 82, ic: 'score', l: 'Puntaje', s: 'Califica al prospecto' },
-      { id: 'pd', x: 610, y: 82, ic: 'pd', l: 'Pipedrive', s: 'Actualiza la ficha' },
-      { id: 'send', x: 104, y: 322, ic: 'wa', l: 'WhatsApp', s: 'Envía la respuesta' },
-      { id: 'hot', x: 270, y: 322, ic: 'ifn', l: '¿Avisar a Alberto?', s: 'If' },
-      { id: 'alert', x: 436, y: 268, ic: 'bell', l: 'WhatsApp', s: 'Alerta al dueño' },
-      { id: 'sched', x: 610, y: 322, ic: 'sched', l: 'Programar', s: 'Seguimientos' }
+      { id: 'trig', x: 50, y: 62, ic: 'wa', l: 'WhatsApp Trigger', s: 'mensaje recibido', k: 'trig' },
+      { id: 'dedupe', x: 145, y: 62, ic: 'dedupe', l: 'Deduplicar', s: 'por ID de mensaje' },
+      { id: 'rafaga', x: 240, y: 62, ic: 'wait', l: 'Agrupar ráfaga', s: 'espera 6 s' },
+      { id: 'pgIn', x: 335, y: 62, ic: 'pg', l: 'Postgres', s: 'guardar entrante' },
+      { id: 'human', x: 430, y: 62, ic: 'ifn', l: '¿Lo atiende humano?', s: 'If' },
+      { id: 'agent', x: 560, y: 62, ic: 'ai', l: 'AI Agent', s: 'asistente de ventas', k: 'ai' },
+      { id: 'model', x: 515, y: 158, ic: 'model', l: 'Modelo', k: 'sub' },
+      { id: 'mem', x: 565, y: 158, ic: 'mem', l: 'Memoria', k: 'sub' },
+      { id: 'tool', x: 615, y: 158, ic: 'tool', l: 'Agenda', k: 'sub' },
+      { id: 'score', x: 50, y: 290, ic: 'code', l: 'Puntaje', s: 'Code' },
+      { id: 'pd', x: 145, y: 290, ic: 'pd', l: 'Pipedrive', s: 'persona + deal' },
+      { id: 'send', x: 240, y: 290, ic: 'wa', l: 'WhatsApp', s: 'enviar respuesta' },
+      { id: 'pgOut', x: 335, y: 290, ic: 'pg', l: 'Postgres', s: 'guardar saliente' },
+      { id: 'hot', x: 430, y: 290, ic: 'ifn', l: '¿Alerta a Alberto?', s: 'If' },
+      { id: 'alert', x: 530, y: 290, ic: 'bell', l: 'WhatsApp', s: 'alerta al dueño' },
+      { id: 'sched', x: 628, y: 290, ic: 'sched', l: 'Programar', s: 'seguimientos' }
     ],
-    edges: [['trig', 'agent'], ['agent', 'score'], ['score', 'pd'],
+    edges: [['trig', 'dedupe'], ['dedupe', 'rafaga'], ['rafaga', 'pgIn'], ['pgIn', 'human'], ['human', 'agent', { lbl: 'no' }],
+      ['agent', 'score', { path: 'M609,62 C640,62 652,80 652,110 L652,198 Q652,214 636,214 L30,214 Q14,214 14,230 L14,274 Q14,290 18,290', ix: 300, iy: 208 }],
       ['model', 'agent', { sub: 1 }], ['mem', 'agent', { sub: 1 }], ['tool', 'agent', { sub: 1 }],
-      ['pd', 'send', { path: RET(644, 82, 70, 322, 676, 252), lx: 350, ly: 246 }],
-      ['send', 'hot'], ['hot', 'alert', { lbl: 'sí', lx: 322, ly: 300 }], ['alert', 'sched'],
-      ['hot', 'sched', { lbl: 'no', path: 'M304,322 C330,322 340,362 372,362 L500,362 C540,362 548,322 576,322', lx: 436, ly: 356 }]]
+      ['score', 'pd'], ['pd', 'send'], ['send', 'pgOut'], ['pgOut', 'hot'], ['hot', 'alert', { lbl: 'sí' }], ['alert', 'sched'],
+      ['hot', 'sched', { lbl: 'no', path: 'M462,290 C482,290 478,238 505,238 L560,238 C590,238 582,290 596,290', lx: 532, ly: 232 }]]
   },
   cron: {
-    name: 'Seguimiento automático', sub: 'Revisa cada 5 minutos si toca escribirle a alguien',
+    name: 'Cron · Seguimientos', tab: 'Seguimientos', sub: 'Revisa cada 5 minutos si toca escribirle a alguien',
     nodes: [
-      { id: 'tick', x: 70, y: 82, ic: 'sched', l: 'Schedule Trigger', s: 'Cada 5 minutos', k: 'trig' },
-      { id: 'due', x: 250, y: 82, ic: 'pg', l: 'Postgres', s: 'Envíos pendientes' },
-      { id: 'alive', x: 430, y: 82, ic: 'ifn', l: '¿Sigue interesado?', s: 'Sin baja ni compra' },
-      { id: 'win', x: 610, y: 82, ic: 'ifn', l: '¿Ventana de 24 h?', s: 'Reglas de WhatsApp' },
-      { id: 'free', x: 150, y: 262, ic: 'ai', l: 'IA · texto libre', s: 'Personalizado', k: 'ai' },
-      { id: 'tpl', x: 150, y: 352, ic: 'tpl', l: 'Plantilla de Meta', s: 'Aprobada', k: 'low' },
-      { id: 'send', x: 390, y: 300, ic: 'wa', l: 'WhatsApp', s: 'Envía el mensaje' },
-      { id: 'note', x: 590, y: 300, ic: 'pd', l: 'Pipedrive', s: 'Registra el contacto' }
+      { id: 'tick', x: 50, y: 92, ic: 'sched', l: 'Schedule Trigger', s: 'cada 5 min', k: 'trig' },
+      { id: 'due', x: 150, y: 92, ic: 'pg', l: 'Postgres', s: 'envíos vencidos' },
+      { id: 'alive', x: 250, y: 92, ic: 'ifn', l: '¿Sigue activo?', s: 'sin baja ni respuesta' },
+      { id: 'win', x: 350, y: 92, ic: 'ifn', l: '¿Ventana 24 h?', s: 'If' },
+      { id: 'free', x: 475, y: 40, ic: 'ai', l: 'IA · texto libre', s: 'personalizado', k: 'ai' },
+      { id: 'tpl', x: 475, y: 165, ic: 'tpl', l: 'Plantilla Meta', s: 'aprobada' },
+      { id: 'send', x: 610, y: 92, ic: 'wa', l: 'WhatsApp', s: 'enviar' },
+      { id: 'mark', x: 475, y: 300, ic: 'pg', l: 'Postgres', s: 'marcar enviado' },
+      { id: 'note', x: 595, y: 300, ic: 'pd', l: 'Pipedrive', s: 'actividad' }
     ],
-    edges: [['tick', 'due'], ['due', 'alive'], ['alive', 'win', { lbl: 'sí' }],
-      ['win', 'free', { lbl: 'abierta', path: RET(644, 82, 75, 262, 676, 196), lx: 48, ly: 254 }],
-      ['win', 'tpl', { lbl: 'cerrada', lx: 62, ly: 344, path: 'M644,82 C676,82 676,82 676,112 L676,182 Q676,196 660,196 L40,196 Q20,196 20,212 L20,338 Q20,352 34,352 L116,352' }],
-      ['free', 'send'], ['tpl', 'send'], ['send', 'note']]
+    edges: [['tick', 'due'], ['due', 'alive'], ['alive', 'win', { lbl: 'sí' }], ['win', 'free', { lbl: 'abierta', lx: 392, ly: 58 }], ['win', 'tpl', { lbl: 'cerrada', lx: 392, ly: 140 }],
+      ['free', 'send'], ['tpl', 'send'],
+      ['send', 'mark', { path: 'M642,92 C668,92 672,120 672,150 L672,228 Q672,244 656,244 L430,244 Q414,244 414,260 L414,284 Q414,300 443,300', ix: 520, iy: 238 }], ['mark', 'note']]
   },
   close: {
-    name: 'Cierre de venta', sub: 'De la clase de prueba al pago',
+    name: 'Cierre · Prueba → pago → alta', tab: 'Cierre', sub: 'Del pago a la inscripción en FitCo',
     nodes: [
-      { id: 'pdTrig', x: 70, y: 82, ic: 'pd', l: 'Pipedrive Trigger', s: 'Asistió a la prueba', k: 'trig' },
-      { id: 'sw', x: 250, y: 82, ic: 'sw', l: 'Switch', s: 'Según el objetivo' },
-      { id: 'offer', x: 430, y: 82, ic: 'ai', l: 'IA · oferta', s: 'Paquete ideal', k: 'ai' },
-      { id: 'sendOffer', x: 610, y: 82, ic: 'wa', l: 'WhatsApp', s: 'Envía la oferta' },
-      { id: 'sub', x: 60, y: 300, ic: 'wa', l: 'Comprobante', s: 'Llega el Yape', k: 'trig' },
-      { id: 'read', x: 175, y: 300, ic: 'eye', l: 'IA · lee imagen', s: 'Monto y operación' },
-      { id: 'confirm', x: 290, y: 300, ic: 'user', l: 'Alberto', s: 'Confirma el pago' },
-      { id: 'fitco', x: 405, y: 300, ic: 'fitco', l: 'FitCo', s: 'Alta del alumno' },
-      { id: 'won', x: 520, y: 300, ic: 'pd', l: 'Pipedrive', s: 'Venta ganada' },
-      { id: 'welcome', x: 635, y: 300, ic: 'wa', l: 'WhatsApp', s: 'Bienvenida' }
+      { id: 'pdTrig', x: 50, y: 70, ic: 'pd', l: 'Pipedrive Trigger', s: 'etapa = Asistió', k: 'trig' },
+      { id: 'sw', x: 160, y: 70, ic: 'sw', l: 'Switch', s: 'según objetivo' },
+      { id: 'offer', x: 290, y: 70, ic: 'ai', l: 'IA · oferta', s: 'paquete recomendado', k: 'ai' },
+      { id: 'sendOffer', x: 420, y: 70, ic: 'wa', l: 'WhatsApp', s: 'enviar oferta' },
+      { id: 'sub', x: 50, y: 270, ic: 'wa', l: 'Comprobante', s: 'desde Entrada', k: 'trig' },
+      { id: 'read', x: 150, y: 270, ic: 'eye', l: 'IA · leer imagen', s: 'monto y operación' },
+      { id: 'confirm', x: 255, y: 270, ic: 'user', l: 'Confirmación', s: 'Alberto aprueba' },
+      { id: 'fitco', x: 360, y: 270, ic: 'fitco', l: 'FitCo', s: 'alta del cliente' },
+      { id: 'won', x: 465, y: 270, ic: 'pd', l: 'Pipedrive', s: 'deal ganado' },
+      { id: 'welcome', x: 570, y: 270, ic: 'wa', l: 'WhatsApp', s: 'bienvenida' }
     ],
     edges: [['pdTrig', 'sw'], ['sw', 'offer', { lbl: 'boda' }], ['offer', 'sendOffer'],
       ['sub', 'read'], ['read', 'confirm'], ['confirm', 'fitco'], ['fitco', 'won'], ['won', 'welcome']]
@@ -645,21 +672,23 @@ const WF = {
 };
 let curWF = null;
 
-const nodeW = n => n.k === 'ai' ? 150 : n.k === 'sub' ? 46 : 68;
-const nodeH = n => n.k === 'sub' ? 46 : 68;
+// mismo espacio de coordenadas que el lienzo original (686 × 380)
+const CW = 686, CH = 380;
+const nodeW = n => n.k === 'ai' ? 98 : n.k === 'sub' ? 46 : 64;
 function edgePath(wf, e) {
   const a = wf.nodes.find(n => n.id === e[0]), b = wf.nodes.find(n => n.id === e[1]), o = e[2] || {};
   if (o.path) return o.path;
-  if (o.sub) return `M${a.x},${a.y - 23} C${a.x},${a.y - 50} ${b.x + (a.x - b.x) * .4},${b.y + 70} ${b.x + (a.x - b.x) * .4},${b.y + 34}`;
-  const x1 = a.x + nodeW(a) / 2, x2 = b.x - nodeW(b) / 2, dx = Math.max(28, (x2 - x1) / 2);
+  if (o.sub) return `M${a.x},${a.y - 23} C${a.x},${a.y - 50} ${b.x},${b.y + 60} ${b.x},${b.y + 32}`;
+  const x1 = a.x + nodeW(a) / 2, x2 = b.x - nodeW(b) / 2, dx = Math.max(24, (x2 - x1) / 2);
   return `M${x1},${a.y} C${x1 + dx},${a.y} ${x2 - dx},${b.y} ${x2},${b.y}`;
 }
 function drawWF(id) {
   curWF = id; const wf = WF[id];
   $('#wfName').textContent = wf.name; $('#wfSub').textContent = wf.sub;
+  $$('#wfTabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.wf === id));
   const c = $('#canvas'); c.innerHTML = '';
   const NS = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'wires'); svg.setAttribute('viewBox', '0 0 696 420'); svg.setAttribute('preserveAspectRatio', 'none');
+  const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'wires'); svg.setAttribute('viewBox', `0 0 ${CW} ${CH}`); svg.setAttribute('preserveAspectRatio', 'none');
   svg.innerHTML = '<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,1 L9,5 L0,9z" fill="#B4B9C4"/></marker><marker id="ar-on" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,1 L9,5 L0,9z" fill="#34C759"/></marker></defs>';
   wf.edges.forEach(e => {
     const o = e[2] || {};
@@ -670,24 +699,29 @@ function drawWF(id) {
     if (o.lbl) {
       const a = wf.nodes.find(n => n.id === e[0]);
       const t = document.createElementNS(NS, 'text'); t.setAttribute('class', 'branch');
-      t.setAttribute('x', o.lx || a.x + nodeW(a) / 2 + 8); t.setAttribute('y', (o.ly || a.y) - (o.ly ? 0 : 8)); t.textContent = o.lbl; svg.append(t);
+      t.setAttribute('x', o.lx || a.x + nodeW(a) / 2 + 6); t.setAttribute('y', o.ly || a.y - 7); t.textContent = o.lbl; svg.append(t);
     }
-    if (!o.sub) {
+    if (o.ix) {
       const a = wf.nodes.find(n => n.id === e[0]), b = wf.nodes.find(n => n.id === e[1]);
       const t = document.createElementNS(NS, 'text'); t.setAttribute('class', 'items'); t.id = 'wl-' + e[0] + '-' + e[1];
-      const lx = o.path ? (o.lx || (a.x + b.x) / 2) : (a.x + nodeW(a) / 2 + b.x - nodeW(b) / 2) / 2;
-      const ly = o.path ? (o.ly || a.y) + (o.lbl ? 16 : 0) : (a.y + b.y) / 2 + 18;
-      t.setAttribute('x', lx); t.setAttribute('y', ly); t.setAttribute('text-anchor', 'middle'); t.textContent = '1 item'; svg.append(t);
+      t.setAttribute('x', o.path ? o.ix : (a.x + b.x) / 2 - 14); t.setAttribute('y', o.path ? o.iy : (a.y + b.y) / 2 + 17); t.textContent = '1 item'; svg.append(t);
     }
   });
   c.append(svg);
   wf.nodes.forEach(n => {
     const d = el('div', 'node' + (n.k ? ' ' + n.k : ''), IC[n.ic] + '<span class="st">' + IC.check + '</span>' +
       '<div class="lbl"><b>' + esc(n.l) + '</b>' + (n.s ? '<small>' + esc(n.s) + '</small>' : '') + '</div>');
-    d.id = 'n-' + n.id; d.style.left = (n.x / 696 * 100) + '%'; d.style.top = (n.y / 420 * 100) + '%';
+    d.id = 'n-' + n.id; d.style.left = (n.x / CW * 100) + '%'; d.style.top = (n.y / CH * 100) + '%';
     c.append(d);
   });
   $('#log').innerHTML = '<li class="log-empty">Cada nodo que se ejecute aparecerá aquí, con lo que hizo.</li>';
+}
+function buildWFTabs() {
+  const w = $('#wfTabs');
+  Object.entries(WF).forEach(([id, wf]) => {
+    const b = el('button', '', esc(wf.tab)); b.type = 'button'; b.dataset.wf = id; b.setAttribute('role', 'tab');
+    b.onclick = () => { if (!S.busy) drawWF(id); }; w.append(b);
+  });
 }
 function nodeOf(id) { return (WF[curWF].nodes.find(n => n.id === id) || {}); }
 function logLine(st, state) {
@@ -1250,6 +1284,7 @@ function stopAuto() { S.auto = false; $('#btnAuto span').textContent = 'Auto'; }
 
 /* ---------- controles ---------- */
 function init() {
+  buildWFTabs();
   const sc = $('#scns');
   SCN.forEach((s, i) => { const b = el('button', '', esc(s.t)); b.type = 'button'; b.title = s.s; b.onclick = () => loadScenario(i); sc.append(b); });
   $('#btnNext').onclick = () => next();
